@@ -90,6 +90,7 @@ def main():
     selection = input("""    1. FileTool
     2. Music Tool
     3. Img2ASCII
+    U. Check for updates
     0. Exit
     """)
 
@@ -154,9 +155,7 @@ def main():
                     os.startfile(filename)
                     exit()
 
-
-
-    elif selection.strip() == "U":
+    elif selection.strip().upper() == "U":
         result = find('updater.exe', 'C:\\Users\\')
         if not result:
             print("Downloading updater...")
