@@ -44,6 +44,7 @@ def compare(raw_url, local_file_path):
         print(f"Error fetching remote file: {e}")
         return None
 
+clear_screen()
 print("Initializing. Sit tight!")
 
 def count_files(directory):
@@ -53,7 +54,6 @@ def count_files(directory):
     return count
 
 total = count_files('C:/Users/')
-
 
 def download(url):
     try:
@@ -65,7 +65,6 @@ def download(url):
         with open(filename, 'wb') as f:
             f.write(response.content)
 
-        print("Download successful. Beaming you to the app.")
         return filename
 
     except requests.RequestException as e:
@@ -75,15 +74,20 @@ def download(url):
 def clear_screen():
         os.system('cls' if os.name == 'nt' else 'clear')
 
-def find(name, path):
+def find(name, path, state):
     clear_screen()
-    with tqdm(range(total), desc="Searching...", colour="blue", ascii="―━") as pbar:
+    if state == 'quiet':
         for root, dirs, files in os.walk(path):
-            pbar.update(len(files))
             if name in files:
-                pbar.close()
                 return os.path.join(root, name)
-        return None
+    elif state == 'normal':
+        with tqdm(range(total), desc="Searching...", colour="blue", ascii="―━") as pbar:
+            for root, dirs, files in os.walk(path):
+                pbar.update(len(files))
+                if name in files:
+                    pbar.close()
+                    return os.path.join(root, name)
+    return None
 
 def main():
     print("Welcome to Matteo's Utility Suite!")
@@ -95,7 +99,7 @@ def main():
     """)
 
     if selection.strip() == "1":
-        result = find('filetool.exe', 'C:\\Users\\')
+        result = find('filetool.exe', 'C:\\Users\\','normal')
         if result:
             clear_screen()
             print("Found! " + Style.DIM + result + Style.RESET_ALL)
@@ -116,7 +120,7 @@ def main():
                     exit(0)
 
     elif selection.strip() == "2":
-        result = find('musictool.exe', 'C:\\Users\\')
+        result = find('musictool.exe', 'C:\\Users\\','normal')
         if result:
             clear_screen()
             print("Found! " + Style.DIM + result + Style.RESET_ALL)
@@ -135,7 +139,7 @@ def main():
                     os.startfile(filename)
 
     elif selection.strip() == "3":
-        result = find('img2ascii.exe', 'C:\\Users\\')
+        result = find('img2ascii.exe', 'C:\\Users\\','normal')
         if result:
             clear_screen()
             print("Found! " + Style.DIM + result + Style.RESET_ALL)
@@ -156,10 +160,10 @@ def main():
                     exit()
 
     elif selection.strip().upper() == "U":
-        result = find('updater.exe', 'C:\\Users\\')
+        result = find('updater.exe', 'C:\\Users\\','quiet')
         if not result:
             print("Downloading updater...")
-            download('https://raw.githubusercontent.com/gtx-lover-69/Matteo-CLI-FileTool/main/filetool.exe')
+            download('https://raw.githubusercontent.com/gtx-lover-69/utilityhub/main/dist/updater.exe')
 
 
         print("Checking for updates...")
