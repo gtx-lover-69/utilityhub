@@ -2,8 +2,47 @@ import os
 from colorama import *
 from colorama.ansi import clear_screen
 from tqdm import tqdm
-import requests
 import time
+import sys
+from sys import exit
+import subprocess
+import requests
+import hashlib
+
+
+def get_file_hash(file_obj):
+    sha256_hash = hashlib.sha256()
+    for chunk in iter(lambda: file_obj.read(4096), b""):
+        sha256_hash.update(chunk)
+    return sha256_hash.hexdigest()
+
+def get_original_directory():
+    if getattr(sys, 'frozen', False):
+        return os.path.dirname(sys.executable)
+    else:
+        return os.path.dirname(os.path.abspath(__file__))
+
+def compare(raw_url, local_file_path):
+    try:
+        response = requests.get(raw_url, stream=True)
+        response.raise_for_status()
+        remote_hash = hashlib.sha256(response.content).hexdigest()
+
+        with open(local_file_path, 'rb') as f:
+            local_hash = get_file_hash(f)
+
+        if remote_hash == local_hash:
+            return True
+        else:
+            return False
+
+    except Exception as e:
+        print(f"Error during comparison: {e}")
+        time.sleep(10)
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching remote file: {e}")
+        return None
 
 print("Initializing. Sit tight!")
 
@@ -73,7 +112,7 @@ def main():
                 if filename:
                     time.sleep(0.5)
                     os.startfile(filename)
-                    exit()
+                    exit(0)
 
     elif selection.strip() == "2":
         result = find('musictool.exe', 'C:\\Users\\')
@@ -93,9 +132,8 @@ def main():
                 if filename:
                     time.sleep(0.5)
                     os.startfile(filename)
-                    exit()
 
-    if selection.strip() == "3":
+    elif selection.strip() == "3":
         result = find('img2ascii.exe', 'C:\\Users\\')
         if result:
             clear_screen()
@@ -109,12 +147,51 @@ def main():
             getFileChoice = input("File not found. Press any key to download it.")
             if getFileChoice or getFileChoice == '':
                 print("Downloading from GitHub...")
-                filename = download('https://raw.githubusercontent.com/gtx-lover-69/img2ascii/main/dist/img2ascii.exe')
+                filename = download('https://raw.githubusercontent.com/gtx-lover-69/img2ascii/main/dist/converter.exe')
 
                 if filename:
                     time.sleep(0.5)
                     os.startfile(filename)
                     exit()
+
+
+
+    elif selection.strip() == "U":
+        result = find('updater.exe', 'C:\\Users\\')
+        if not result:
+            print("Downloading updater...")
+            download('https://raw.githubusercontent.com/gtx-lover-69/Matteo-CLI-FileTool/main/filetool.exe')
+
+
+        print("Checking for updates...")
+        local_file = os.path.join(get_original_directory(), "main.exe")
+
+        check = compare("https://raw.githubusercontent.com/gtx-lover-69/utilityhub/main/dist/main.exe",local_file)
+
+        if check is True:
+            print("No updates found.")
+            time.sleep(1)
+
+        elif check is False:
+                print("Update found. Downloading... ")
+                update_file = os.path.join(get_original_directory(),"main_new.exe")
+
+                response = requests.get("https://raw.githubusercontent.com/gtx-lover-69/utilityhub/main/dist/main.exe",timeout=30)
+                response.raise_for_status()
+
+                with open(update_file, "wb") as f:
+                    f.write(response.content)
+
+                subprocess.Popen([
+                    os.path.join(get_original_directory(), "updater.exe"),
+                    local_file,
+                    update_file
+                ])
+
+                exit(0)
+        else:
+            print("Failed to check for updates.")
+            time.sleep(2)
 
     elif selection.strip() == "0":
         exit()
@@ -125,6 +202,6 @@ def main():
         clear_screen()
 
 
-while __name__ == '__main__':
+if __name__ == '__main__':
     clear_screen()
     main()
