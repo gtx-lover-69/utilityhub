@@ -100,6 +100,7 @@ def main():
     selection = input("""    1. FileTool
     2. Music Tool
     3. Img2ASCII
+    4. Zippy
     U. Check for updates
     0. Exit
     """)
@@ -166,6 +167,27 @@ def main():
                     os.startfile(filename)
                     exit()
 
+    elif selection.strip() == "4":
+        result = find('zippy.exe', 'C:\\Users\\','normal')
+        if result:
+            clear_screen()
+            print("Found! " + Style.DIM + result + Style.RESET_ALL)
+            time.sleep(0.5)
+            os.startfile(result)
+            exit()
+
+        else:
+            clear_screen()
+            getFileChoice = input("File not found. Press any key to download it.")
+            if getFileChoice or getFileChoice == '':
+                print("Downloading from GitHub...")
+                filename = download('https://raw.githubusercontent.com/gtx-lover-69/ZipPy/main/dist/zippy.exe')
+
+                if filename:
+                    time.sleep(0.5)
+                    os.startfile(filename)
+                    exit()
+
     elif selection.strip().upper() == "U":
         result = find('updater.exe', 'C:\\Users\\','quiet')
         if not result:
@@ -174,9 +196,9 @@ def main():
 
 
         print("Checking for updates...")
-        local_file = os.path.join(get_original_directory(), "main.exe")
+        local_file = os.path.join(get_original_directory(), "utilityhub.exe")
 
-        check = compare("https://raw.githubusercontent.com/gtx-lover-69/utilityhub/main/dist/main.exe",local_file)
+        check = compare("https://raw.githubusercontent.com/gtx-lover-69/utilityhub/main/dist/utilityhub.exe",local_file)
 
         if check is True:
             print("No updates found.")
@@ -184,10 +206,10 @@ def main():
 
 
         elif check is False:
-                print("Update found. Downloading... ")
-                update_file = os.path.join(get_original_directory(),"main_new.exe")
+                print("Update found! Downloading... ")
+                update_file = os.path.join(get_original_directory(),"utilityhubnew.exe")
 
-                response = requests.get("https://raw.githubusercontent.com/gtx-lover-69/utilityhub/main/dist/main.exe",timeout=30)
+                response = requests.get("https://raw.githubusercontent.com/gtx-lover-69/utilityhub/main/dist/utilityhub.exe",timeout=30)
                 response.raise_for_status()
 
                 with open(update_file, "wb") as f:
