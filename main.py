@@ -76,17 +76,23 @@ def clear_screen():
 
 def find(name, path, state):
     clear_screen()
-    if state == 'quiet':
-        for root, dirs, files in os.walk(path):
-            if name in files:
-                return os.path.join(root, name)
-    elif state == 'normal':
-        with tqdm(range(total), desc="Searching...", colour="blue", ascii="―━") as pbar:
-            for root, dirs, files in os.walk(path):
-                pbar.update(len(files))
-                if name in files:
-                    pbar.close()
-                    return os.path.join(root, name)
+
+    iterator = os.walk(path)
+
+    if state == "normal":
+        iterator = tqdm(iterator, desc="Searching...", colour="blue", ascii="―━")
+
+    for root, dirs, files in iterator:
+        if name in files:
+            full_path = os.path.join(root, name)
+
+            try:
+                with open(full_path, "rb"):
+                    pass
+                return full_path
+            except PermissionError:
+                continue
+
     return None
 
 def main():
@@ -99,7 +105,8 @@ def main():
     """)
 
     if selection.strip() == "1":
-        result = find('filetool.exe', 'C:\\Users\\','normal')
+        result = find('filetool.exe', 'C:\\Users\\', 'normal')
+
         if result:
             clear_screen()
             print("Found! " + Style.DIM + result + Style.RESET_ALL)
@@ -175,6 +182,7 @@ def main():
             print("No updates found.")
             time.sleep(1)
 
+
         elif check is False:
                 print("Update found. Downloading... ")
                 update_file = os.path.join(get_original_directory(),"main_new.exe")
@@ -191,7 +199,6 @@ def main():
                     update_file
                 ])
 
-                exit(0)
         else:
             print("Failed to check for updates.")
             time.sleep(2)
